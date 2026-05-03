@@ -19,8 +19,11 @@ app.use(cors())
 dbConfig()
 
 
-app.get("/",(req,res) =>{
-    res.send("Hello Bangladesh")
+app.post("/registration",(req,res) =>{
+    const {email,password,confirmPassword,terms} = req.body
+    if(!terms){
+        res.send({message: 'Please Accept Our Terms and Condition'})
+    }
 })
 
 let port = process.env.PORT || 8000
