@@ -1,5 +1,5 @@
 const User = require('../models/userModel');
-const { mailVerification, resetPasswordMail } = require('../utils/email'); 
+const { mailVerification, resetPasswordMail } = require('../utils/email');
 const { emptyFieldValidation } = require('../utils/validation');
 const tokenGenerator = require('../utils/tokenGenerator');
 const existingData = require('../utils/exixtingData');
@@ -14,7 +14,7 @@ const registrationController = async (req, res) => {
 
     let users = await existingData(res, { email: email });
     if (users) {
-        return res.send({ message: 'User Already Exists' }); 
+        return res.send({ message: 'User Already Exists' });
     }
 
     if (!terms) {
@@ -34,7 +34,7 @@ const registrationController = async (req, res) => {
         terms: terms,
     });
 
-    await user.save(); 
+    await user.save();
 
     let token = tokenGenerator({
         id: user._id,
@@ -48,31 +48,57 @@ const registrationController = async (req, res) => {
 //  Login Controller
 
 
-const loginController = async (req, res) => {
-    const { email, password } = req.body;
+// const loginController = async (req, res) => {
+//     const { email, password } = req.body;
 
-    let users = await existingData(res, { email: email });
+//     let users = await existingData(res, { email: email });
+//     if (!users) {
+//         return res.send({ message: "User not found" });
+//     }
+
+
+//     emptyFieldValidation(res, email, password);
+
+//     let pass = bcrypt.compareSync(password, users.password);
+//     if (!pass) {
+//         return res.send({ message: "Invalid Credentials" });
+//     }
+
+//     res.send({ message: "Login Successful" });
+// };
+
+
+
+
+let loginController = async (req, res) => {
+    const { email, password } = req.body
+
+    let users = await User.findOne({ email: email })
     if (!users) {
-        return res.send({ message: "User not found" });
+        return res.send({ message: "User not found" })
     }
-    
-   
-    emptyFieldValidation(res, email, password);
+    emptyFieldValidation(res, email, password)
 
     let pass = bcrypt.compareSync(password, users.password);
+
     if (!pass) {
-        return res.send({ message: "Invalid Credentials" });
+        return res.send({ message: "Invalid Credential" })
     }
 
-    res.send({ message: "Login Successful" });
-};
+    res.send({
+        message: "Login Successfull"
+    })
+
+}
 
 //  Forgot Password Controller
 
 
 const forgotPasswordController = async (req, res) => {
     let { email } = req.body;
-   
+
+    emptyFieldValidation(res, email)    //ttthds
+
 
     let users = await User.findOne({ email: email });
     if (!users) {
@@ -99,13 +125,16 @@ const resetPasswordController = async (req, res) => {
         return res.send({ message: "Confirm Password Not Matched" });
     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,  async function(err, decoded) {
-           if(err){
-               res.send({message: "Unauthorized"})
-           }else {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
+        if (err) {
+            res.send({ message: "Unauthorized" })
+        } else {
             const hash = bcrypt.hashSync(newPassword, 10);
-            await User.findByIdAndUpdate({ _id: decoded.id }, { password: hash });
-            res.send({ message: "Password Updated" });
+
+            console.log(decoded)
+
+            const updateData = await User.findByIdAndUpdate({ _id: decoded.id }, { password: hash }, { new: true })
+            res.send({ message: "Password Updated", updateData })
         }
     });
 };
@@ -116,7 +145,7 @@ const resetPasswordController = async (req, res) => {
 const resendVerificationEmailController = async (req, res) => {
     let { email } = req.body;
     let user = await User.findOne({ email: email });
-    
+
     if (!user) return res.send({ message: "User not found" });
 
     let token = tokenGenerator({
@@ -124,14 +153,48 @@ const resendVerificationEmailController = async (req, res) => {
         email: user.email
     }, "kjlxfhgkjfddc", "1d");
 
-    mailVerification(token, email); 
+    mailVerification(token, email);
     res.send({ message: 'Check your email for verification' });
 };
 
-module.exports = { 
-    registrationController, 
-    loginController, 
-    forgotPasswordController, 
-    resetPasswordController, 
-    resendVerificationEmailController 
+
+
+// verifyEmailController
+
+
+let verifyEmailController = async (req, res) => {
+    const { token } = req.params
+
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
+        if (err) {
+            res.send({ message: "Unauthorized" })
+        } else {
+            const userId = decoded.id
+            let findUser = await User.findById(userId)
+            if (findUser.isVerified) {
+                return res.send({ message: "User already verified" })
+            } else {
+                findUser.isVerified = true
+                findUser.save()
+                res.send({ message: "Email verified successfully" })
+            }
+
+        }
+    });
+
+};
+
+
+
+
+
+
+module.exports = {
+    registrationController,
+    loginController,
+    forgotPasswordController,
+    resetPasswordController,
+    resendVerificationEmailController,
+    verifyEmailController
 };
