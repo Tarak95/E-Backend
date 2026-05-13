@@ -6,9 +6,10 @@ let existingData = async (res, findData) => {
 
     if (existingUser) {
         // res.send({ message: "User already exist" })
+
         return true;
     }
-    else{
+    else {
         return false;
     }
 

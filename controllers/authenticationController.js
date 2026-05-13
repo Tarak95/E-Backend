@@ -39,35 +39,14 @@ const registrationController = async (req, res) => {
     let token = tokenGenerator({
         id: user._id,
         email: user.email
-    }, "kjlxfhgkjfddc", "1d");
+    }, process.env.ACCESS_TOKEN_SECRET, "1d");
 
     mailVerification(token, email);
     res.send({ message: "Registration Successful" });
 };
 
-//  Login Controller
 
-
-// const loginController = async (req, res) => {
-//     const { email, password } = req.body;
-
-//     let users = await existingData(res, { email: email });
-//     if (!users) {
-//         return res.send({ message: "User not found" });
-//     }
-
-
-//     emptyFieldValidation(res, email, password);
-
-//     let pass = bcrypt.compareSync(password, users.password);
-//     if (!pass) {
-//         return res.send({ message: "Invalid Credentials" });
-//     }
-
-//     res.send({ message: "Login Successful" });
-// };
-
-
+// loginController
 
 
 let loginController = async (req, res) => {
@@ -85,8 +64,17 @@ let loginController = async (req, res) => {
         return res.send({ message: "Invalid Credential" })
     }
 
+
+      // লগইন সফল হলে টোকেন জেনারেট করে রেসপন্সে পাঠানো উচিত
+    let token = tokenGenerator({
+        id: users._id,
+        email: users.email
+    }, process.env.ACCESS_TOKEN_SECRET, "1d");
+
     res.send({
-        message: "Login Successfull"
+        message: "Login Successfull",
+        token: token 
+        // token: token  ক্লায়েন্ট সাইডে ব্যবহারের জন্য টোকেন পাস করা হলো
     })
 
 }
@@ -97,7 +85,7 @@ let loginController = async (req, res) => {
 const forgotPasswordController = async (req, res) => {
     let { email } = req.body;
 
-    emptyFieldValidation(res, email)    //ttthds
+    emptyFieldValidation(res, email)
 
 
     let users = await User.findOne({ email: email });
@@ -108,7 +96,7 @@ const forgotPasswordController = async (req, res) => {
     let token = tokenGenerator({
         id: users._id,
         email: users.email
-    }, "kjlxfhgkjfddc", "1d");
+    }, process.env.ACCESS_TOKEN_SECRET, "1d");
 
     resetPasswordMail(token, email);
     res.send({ message: "Please Check Your Email" });
@@ -127,7 +115,7 @@ const resetPasswordController = async (req, res) => {
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
         if (err) {
-            res.send({ message: "Unauthorized" })
+          return  res.send({ message: "Unauthorized" })  // return যোগ করা হয়েছে
         } else {
             const hash = bcrypt.hashSync(newPassword, 10);
 
@@ -151,7 +139,7 @@ const resendVerificationEmailController = async (req, res) => {
     let token = tokenGenerator({
         id: user._id,
         email: user.email
-    }, "kjlxfhgkjfddc", "1d");
+    }, process.env.ACCESS_TOKEN_SECRET, "1d");
 
     mailVerification(token, email);
     res.send({ message: 'Check your email for verification' });
@@ -168,7 +156,7 @@ let verifyEmailController = async (req, res) => {
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
         if (err) {
-            res.send({ message: "Unauthorized" })
+           return res.send({ message: "Unauthorized" })  // return যোগ করা হয়েছে
         } else {
             const userId = decoded.id
             let findUser = await User.findById(userId)
@@ -176,7 +164,7 @@ let verifyEmailController = async (req, res) => {
                 return res.send({ message: "User already verified" })
             } else {
                 findUser.isVerified = true
-                findUser.save()
+              await  findUser.save()  // এখানে await যোগ করা হয়েছে ডাটা সঠিকভাবে সেভ হওয়ার জন্য
                 res.send({ message: "Email verified successfully" })
             }
 

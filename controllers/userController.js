@@ -40,4 +40,4 @@ let updateUserController = async (req, res) => {
 }
 
 
-module.exports = {getAllUsersController,singleUserDataController,deleteUserController,updateUserController}
+module.exports = { getAllUsersController, singleUserDataController, deleteUserController, updateUserController }

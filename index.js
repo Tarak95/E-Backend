@@ -5,7 +5,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const dbConfig = require("./config/dbConfig")
-const {registrationController,loginController,forgotPasswordController,resetPasswordController,resendVerificationEmailController,verifyEmailController} = require('./controllers/authenticationController')
+const { registrationController, loginController, forgotPasswordController, resetPasswordController, resendVerificationEmailController, verifyEmailController } = require('./controllers/authenticationController')
 const { getAllUsersController, singleUserDataController, deleteUserController, updateUserController } = require('./controllers/userController');
 
 
