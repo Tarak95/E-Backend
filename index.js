@@ -7,6 +7,7 @@ const cors = require('cors')
 const dbConfig = require("./config/dbConfig")
 const { registrationController, loginController, forgotPasswordController, resetPasswordController, resendVerificationEmailController, verifyEmailController } = require('./controllers/authenticationController')
 const { getAllUsersController, singleUserDataController, deleteUserController, updateUserController } = require('./controllers/userController');
+const { createProductController } = require('./controllers/productController')
 
 
 
@@ -23,6 +24,10 @@ app.post("/forgotpassword", forgotPasswordController);
 app.post("/resetpassword/:token", resetPasswordController);
 app.post("/resendVerificationEmail", resendVerificationEmailController);
 app.post('/verifyemail/:token', verifyEmailController)
+
+
+//Product Create
+app.post('/createproduct', createProductController)
 
 
 
