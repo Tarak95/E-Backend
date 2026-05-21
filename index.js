@@ -7,7 +7,7 @@ const cors = require('cors')
 const dbConfig = require("./config/dbConfig")
 const { registrationController, loginController, forgotPasswordController, resetPasswordController, resendVerificationEmailController, verifyEmailController } = require('./controllers/authenticationController')
 const { getAllUsersController, singleUserDataController, deleteUserController, updateUserController } = require('./controllers/userController');
-const { createProductController } = require('./controllers/productController')
+const { createProductController,allProductController, singleProductController, deleteProductController, updateProductController  } = require('./controllers/productController')
 
 
 
@@ -28,6 +28,10 @@ app.post('/verifyemail/:token', verifyEmailController)
 
 //Product Create
 app.post('/createproduct', createProductController)
+app.get('/allProduct', allProductController)
+app.post('/singleProduct', singleProductController)
+app.delete('/deleteProduct', deleteProductController)
+app.post('/updateProduct/:id', updateProductController)
 
 
 
