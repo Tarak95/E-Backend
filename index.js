@@ -9,6 +9,7 @@ const { registrationController, loginController, forgotPasswordController, reset
 const { getAllUsersController, singleUserDataController, deleteUserController, updateUserController } = require('./controllers/userController');
 const { createProductController,allProductController, singleProductController, deleteProductController, updateProductController  } = require('./controllers/productController')
 const axios = require('axios')
+const { createCart, increDecre, getCart, proDelete } = require('./controllers/cartController')
 
 
 // Middleware
@@ -67,6 +68,13 @@ app.post('/payment', async (req, res) => {
 });
 
 
+
+// Cart Management
+
+app.post('/cart/create', createCart)
+app.post('/cart/update/:id', increDecre)
+app.get('/cart/:userId', getCart)
+app.delete('/cart/:id', proDelete)
 
 
 
