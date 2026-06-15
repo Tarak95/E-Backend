@@ -7,7 +7,7 @@ const cors = require('cors')
 const dbConfig = require("./config/dbConfig")
 const { registrationController, loginController, forgotPasswordController, resetPasswordController, resendVerificationEmailController, verifyEmailController } = require('./controllers/authenticationController')
 const { getAllUsersController, singleUserDataController, deleteUserController, updateUserController } = require('./controllers/userController');
-const { createProductController,allProductController, singleProductController, deleteProductController, updateProductController  } = require('./controllers/productController')
+const { createProductController, allProductController, singleProductController, deleteProductController, updateProductController } = require('./controllers/productController')
 const axios = require('axios')
 const { createCart, increDecre, getCart, proDelete } = require('./controllers/cartController')
 
