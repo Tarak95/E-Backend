@@ -8,7 +8,7 @@ const dbConfig = require("./config/dbConfig")
 const { registrationController, loginController, forgotPasswordController, resetPasswordController, resendVerificationEmailController, verifyEmailController } = require('./controllers/authenticationController')
 const { getAllUsersController, singleUserDataController, deleteUserController, updateUserController } = require('./controllers/userController');
 const { createProductController,allProductController, singleProductController, deleteProductController, updateProductController  } = require('./controllers/productController')
-
+const axios = require('axios')
 
 
 // Middleware
@@ -32,6 +32,39 @@ app.get('/allProduct', allProductController)
 app.post('/singleProduct', singleProductController)
 app.delete('/deleteProduct', deleteProductController)
 app.post('/updateProduct/:id', updateProductController)
+
+
+// Payment
+
+
+app.post('/payment', async (req, res) => {
+    try {
+        const data = await axios.post(
+            'https://sandbox.aamarpay.com/jsonpost.php',
+            {
+                store_id: "aamarpaytest",
+                signature_key: "dbb74894e82415a2f7ff0ec3a97e4183",
+                ...req.body,
+                tran_id: Date.now(),
+                currency: "BDT",
+                success_url: "https://example.com/success.php",
+                fail_url: "https://example.com/fail.php",
+                cancel_url: "https://example.com/cancel.php",
+                desc: "Lend Money",
+                type: "json"
+            }
+        );
+
+        res.send(data.data);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            success: false,
+            message: error.message
+        });
+    }
+});
 
 
 
