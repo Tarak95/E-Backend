@@ -62,7 +62,7 @@ const proDelete = async (req, res) => {
 const getCart = async (req, res) => {
     const { userId } = req.params
 
-    const cart = await Cart.find({ _id: userId })
+    const cart = await Cart.find({ user: userId })
 
     let totalPrice = 0
 
