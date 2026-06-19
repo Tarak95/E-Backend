@@ -10,6 +10,10 @@ const { getAllUsersController, singleUserDataController, deleteUserController, u
 const { createProductController, allProductController, singleProductController, deleteProductController, updateProductController } = require('./controllers/productController')
 const axios = require('axios')
 const { createCart, increDecre, getCart, proDelete } = require('./controllers/cartController')
+const multer = require('multer')
+
+
+
 
 
 // const { rateLimit } = require('express-rate-limit')
@@ -21,6 +25,22 @@ const { createCart, increDecre, getCart, proDelete } = require('./controllers/ca
 //     ipv6Subnet: 56,
 // })
 // app.use(limiter)
+
+
+
+// ==== multer ====
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/products');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, uniqueSuffix + "-" + file.originalname);
+    },
+});
+
+const upload = multer({ storage: storage });
 
 
 
@@ -40,11 +60,15 @@ app.post('/verifyemail/:token', verifyEmailController)
 
 
 //Product Create
-app.post('/createproduct', createProductController)
-app.get('/allProduct', allProductController)
-app.post('/singleProduct', singleProductController)
-app.delete('/deleteProduct', deleteProductController)
-app.post('/updateProduct/:id', updateProductController)
+
+app.post('/createproduct', upload.array('photos', 5), createProductController)
+
+app.get('/allproduct', allProductController)
+app.get('/singleproduct/:id', singleProductController)
+
+app.delete('/deleteproduct/:id', deleteProductController) 
+app.post('/updateproduct/:id', upload.array('photos', 5), updateProductController) 
+
 
 
 // Payment
