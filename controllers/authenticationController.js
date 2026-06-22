@@ -65,7 +65,7 @@ let loginController = async (req, res) => {
     }
 
 
-      // লগইন সফল হলে টোকেন জেনারেট করে রেসপন্সে পাঠানো উচিত
+      
     let token = tokenGenerator({
         id: users._id,
         email: users.email
@@ -74,7 +74,7 @@ let loginController = async (req, res) => {
     res.send({
         message: "Login Successfull",
         token: token 
-        // token: token  ক্লায়েন্ট সাইডে ব্যবহারের জন্য টোকেন পাস করা হলো
+        
     })
 
 }
@@ -115,7 +115,7 @@ const resetPasswordController = async (req, res) => {
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
         if (err) {
-          return  res.send({ message: "Unauthorized" })  // return যোগ করা হয়েছে
+          return  res.send({ message: "Unauthorized" })  
         } else {
             const hash = bcrypt.hashSync(newPassword, 10);
 
@@ -156,7 +156,7 @@ let verifyEmailController = async (req, res) => {
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
         if (err) {
-           return res.send({ message: "Unauthorized" })  // return যোগ করা হয়েছে
+           return res.send({ message: "Unauthorized" })  
         } else {
             const userId = decoded.id
             let findUser = await User.findById(userId)
@@ -164,7 +164,7 @@ let verifyEmailController = async (req, res) => {
                 return res.send({ message: "User already verified" })
             } else {
                 findUser.isVerified = true
-              await  findUser.save()  // এখানে await যোগ করা হয়েছে ডাটা সঠিকভাবে সেভ হওয়ার জন্য
+              await  findUser.save()  
                 res.send({ message: "Email verified successfully" })
             }
 
