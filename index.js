@@ -12,6 +12,8 @@ const axios = require('axios')
 const { createCart, increDecre, getCart, proDelete } = require('./controllers/cartController')
 const multer = require('multer')
 
+const { paymentController, getAllOrdersController } = require('./controllers/paymentController')
+
 
 
 
@@ -74,43 +76,17 @@ app.post('/updateproduct/:id', upload.array('photos', 5), updateProductControlle
 // Payment
 
 
-app.post('/payment', async (req, res) => {
-    try {
-        const data = await axios.post(
-            'https://sandbox.aamarpay.com/jsonpost.php',
-            {
-                store_id: "aamarpaytest",
-                signature_key: "dbb74894e82415a2f7ff0ec3a97e4183",
-                ...req.body,
-                tran_id: Date.now(),
-                currency: "BDT",
-                success_url: "https://example.com/success.php",
-                fail_url: "https://example.com/fail.php",
-                cancel_url: "https://example.com/cancel.php",
-                desc: "Lend Money",
-                type: "json"
-            }
-        );
-
-        res.send(data.data);
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({
-            success: false,
-            message: error.message
-        });
-    }
-});
-
-
-
 // Cart Management
 
 app.post('/cart/create', createCart)
 app.post('/cart/update/:id', increDecre)
 app.get('/cart/:userId', getCart)
 app.delete('/cart/:id', proDelete)
+
+
+// Order Management
+app.post('/payment', paymentController)
+app.get('/getorders/:userid', getAllOrdersController)
 
 
 
