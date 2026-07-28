@@ -10,15 +10,11 @@ const jwt = require('jsonwebtoken');
 
 
 const registrationController = async (req, res) => {
-    const { email, password, confirmPassword, terms } = req.body;
+    const { email, password, confirmPassword, name } = req.body;
 
     let users = await existingData(res, { email: email });
     if (users) {
         return res.send({ message: 'User Already Exists' });
-    }
-
-    if (!terms) {
-        return res.send({ message: "Please Accept Our Terms and Condition" });
     }
 
     emptyFieldValidation(res, email, password, confirmPassword);
@@ -31,7 +27,7 @@ const registrationController = async (req, res) => {
     let user = new User({
         email: email,
         password: hash,
-        terms: terms,
+        name: name,
     });
 
     await user.save();

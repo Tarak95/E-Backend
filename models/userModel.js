@@ -1,11 +1,8 @@
 const mongoose = require("mongoose")
-const {Schema} = mongoose
+const { Schema } = mongoose
 
 const useSchema = new Schema({
-    firstName: {
-        type: String,
-    },
-    lastName: {
+    name: {
         type: String,
     },
     email: {
@@ -14,57 +11,48 @@ const useSchema = new Schema({
     password: {
         type: String,
     },
-    phoneNumber: {
+    phone: {
         type: String,
     },
-    terms:{
-        type: Boolean,
-    },
-    profile: {
-        type: String,
-    },
-    isVerified:{
+    isVerified: {
         type: Boolean,
         default: false
     },
-    role:{
+    role: {
         type: String,
-        enum: ['admin','user','editor','vendor'],
+        enum: ['admin', 'user', 'editor', 'vendor'],
         default: 'user'
     },
     isHold: {
         type: Boolean,
         default: false
     },
-    billingAddress:{
-        firstName: {
+    postalCode: {
         type: String,
-        },
-        lastName: {
+    },
+    address: {
+        type: String,
+    },
+    city: {
+        type: String,
+    },
+    billingAddress: {
+        fullName: {
             type: String,
         },
         email: {
             type: String,
         },
-        companyName: {
+        street: {
             type: String,
         },
-        street:{
-            type: String,
-        },
-        state:{
-            type: String,
-        },
-        zipCode:{
+        zipCode: {
             type: String,
         },
         phoneNumber: {
             type: String,
         },
-        country: {
-            type: String,
-        }
     }
 })
 
-module.exports = mongoose.model('User',useSchema)
+module.exports = mongoose.model('User', useSchema)
