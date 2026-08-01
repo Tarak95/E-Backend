@@ -45,35 +45,73 @@ const registrationController = async (req, res) => {
 // loginController
 
 
-let loginController = async (req, res) => {
-    const { email, password } = req.body
+// let loginController = async (req, res) => {
+//     const { email, password } = req.body
 
-    let users = await User.findOne({ email: email })
-    if (!users) {
-        return res.send({ message: "User not found" })
-    }
-    emptyFieldValidation(res, email, password)
+//     let users = await User.findOne({ email: email })
+//     if (!users) {
+//         return res.send({ message: "User not found" })
+//     }
+//     emptyFieldValidation(res, email, password)
 
-    let pass = bcrypt.compareSync(password, users.password);
+//     let pass = bcrypt.compareSync(password, users.password);
 
-    if (!pass) {
-        return res.send({ message: "Invalid Credential" })
-    }
+//     if (!pass) {
+//         return res.send({ message: "Invalid Credential" })
+//     }
 
 
       
-    let token = tokenGenerator({
-        id: users._id,
-        email: users.email
-    }, process.env.ACCESS_TOKEN_SECRET, "1d");
+//     let token = tokenGenerator({
+//         id: users._id,
+//         email: users.email
+//     }, process.env.ACCESS_TOKEN_SECRET, "1d");
 
-    res.send({
-        message: "Login Successfull",
-        token: token 
+//     res.send({
+//         message: "Login Successfull",
+//         token: token 
         
-    })
+//     })
 
-}
+// }
+
+
+
+let loginController = async (req, res) => {
+  const { email, password } = req.body;
+
+  let users = await User.findOne({ email: email });
+  if (!users) {
+    return res.send({ 
+        success: false,
+        message: "User not found" 
+    });
+  }
+  emptyFieldValidation(res, email, password);
+
+  let pass = bcrypt.compareSync(password, users.password);
+
+  if (!pass) {
+    return res.send({
+      success: false,
+      message: "Invalid Credential",
+    });
+  }
+
+
+  res.send({
+    success: true,
+    message: "Login Successfull",
+    data: {
+      _id: users._id,
+      name: users.name,
+      email: users.email,
+      isVerified: users.isVerified,
+      role: users.role,
+      isHold: users.isHold,
+    }
+  });
+};
 
 //  Forgot Password Controller
 
