@@ -16,7 +16,7 @@ const useSchema = new Schema({
     },
     isVerified: {
         type: Boolean,
-        default: false
+        default: false 
     },
     role: {
         type: String,
