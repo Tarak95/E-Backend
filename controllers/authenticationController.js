@@ -9,36 +9,82 @@ const jwt = require('jsonwebtoken');
 //  Registration Controller
 
 
+// const registrationController = async (req, res) => {
+//     const { email, password, confirmPassword, name } = req.body;
+
+//     let users = await existingData(res, { email: email });
+//     if (users) {
+//         return res.send({ message: 'User Already Exists' });
+//     }
+
+//     emptyFieldValidation(res, email, password, confirmPassword);
+
+//     if (password !== confirmPassword) {
+//         return res.send({ message: "Password not matched" });
+//     }
+
+//     const hash = bcrypt.hashSync(password, 10);
+//     let user = new User({
+//         email: email,
+//         password: hash,
+//         name: name,
+//     });
+
+//     await user.save();
+
+//     let token = tokenGenerator({
+//         id: user._id,
+//         email: user.email
+//     }, process.env.ACCESS_TOKEN_SECRET, "1d");
+
+//     mailVerification(token, email);
+//     res.send({ message: "Registration Successful" });
+// };
+
+
+
 const registrationController = async (req, res) => {
+  try {
     const { email, password, confirmPassword, name } = req.body;
 
     let users = await existingData(res, { email: email });
     if (users) {
-        return res.send({ message: 'User Already Exists' });
+      return res.status(400).json({ message: "User Already Exists" });
     }
 
-    emptyFieldValidation(res, email, password, confirmPassword);
+    if (!email || !password || !confirmPassword || !name) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
     if (password !== confirmPassword) {
-        return res.send({ message: "Password not matched" });
+      return res.status(400).json({ message: "Password not matched" });
     }
 
     const hash = bcrypt.hashSync(password, 10);
     let user = new User({
-        email: email,
-        password: hash,
-        name: name,
+      email: email,
+      password: hash,
+      name: name,
     });
 
     await user.save();
 
-    let token = tokenGenerator({
-        id: user._id,
-        email: user.email
-    }, process.env.ACCESS_TOKEN_SECRET, "1d");
+   
+    let token = tokenGenerator(
+      { id: user._id, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      "1d"
+    );
 
-    mailVerification(token, email);
-    res.send({ message: "Registration Successful" });
+    await mailVerification(token, email);
+
+    
+    return res.status(200).json({ message: "Registration Successful" });
+
+  } catch (error) {
+    console.error("Registration Error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 
