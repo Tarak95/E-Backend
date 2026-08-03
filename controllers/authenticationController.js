@@ -185,28 +185,59 @@ const forgotPasswordController = async (req, res) => {
 //  Reset Password Controller
 
 
+// const resetPasswordController = async (req, res) => {
+//     let { newPassword, confirmPassword } = req.body;
+//     let { token } = req.params;
+
+//     if (newPassword !== confirmPassword) {
+//         return res.send({ message: "Confirm Password Not Matched" });
+//     }
+
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
+//         if (err) {
+//           return  res.send({ message: "Unauthorized" })  
+//         } else {
+//             const hash = bcrypt.hashSync(newPassword, 10);
+
+//             console.log(decoded)
+
+//             const updateData = await User.findByIdAndUpdate({ _id: decoded.id }, { password: hash }, { new: true })
+//             res.send({ message: "Password Updated", updateData })
+//         }
+//     });
+// };
+
+
+
 const resetPasswordController = async (req, res) => {
     let { newPassword, confirmPassword } = req.body;
-    let { token } = req.params;
+    let { token } = req.params; 
 
     if (newPassword !== confirmPassword) {
-        return res.send({ message: "Confirm Password Not Matched" });
+        return res.status(400).send({ message: "Confirm Password Not Matched" });
     }
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function (err, decoded) {
         if (err) {
-          return  res.send({ message: "Unauthorized" })  
+            return res.status(401).send({ message: "Unauthorized or Expired Token" });
         } else {
-            const hash = bcrypt.hashSync(newPassword, 10);
+            try {
+                const hash = bcrypt.hashSync(newPassword, 10);
 
-            console.log(decoded)
+               
+                const updateData = await User.findByIdAndUpdate(
+                    decoded.id, 
+                    { password: hash }, 
+                    { new: true }
+                );
 
-            const updateData = await User.findByIdAndUpdate({ _id: decoded.id }, { password: hash }, { new: true })
-            res.send({ message: "Password Updated", updateData })
+                res.status(200).send({ message: "Password Updated", updateData });
+            } catch (error) {
+                res.status(500).send({ message: "Server Error" });
+            }
         }
     });
 };
-
 
 
 
