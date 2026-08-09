@@ -43,8 +43,8 @@ const jwt = require('jsonwebtoken');
 
 const registrationController = async (req, res) => {
   try {
-    // phone যুক্ত করা হলো
-    const { email, password, confirmPassword, name, phone } = req.body;
+    // 🎯 role যুক্ত করা হলো
+    const { email, password, confirmPassword, name, phone, role } = req.body;
 
     // ১. অলরেডি ইউজার আছে কিনা চেক
     let users = await existingData(res, { email: email });
@@ -52,30 +52,31 @@ const registrationController = async (req, res) => {
       return res.status(400).json({ message: "User Already Exists" });
     }
 
-    // ২. রিকোয়ার্ড ফিল্ড ভ্যালিডেশন
+    // ২. রিকোয়ার্ড ফিল্ড ভ্যালিডেশন
     if (!email || !password || !confirmPassword || !name) {
       return res.status(400).json({ message: "All required fields must be filled" });
     }
 
-    // ৩. পাসওয়ার্ড ম্যাচিং চেক
+    // ৩. পাসওয়ার্ড ম্যাচিং চেক
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
 
-    // ৪. পাসওয়ার্ড হ্যাশ করা ও ডাটাবেজে সেভ
+    // ৪. পাসওয়ার্ড হ্যাশ করা ও ডাটাবেজে সেভ (role সহ)
     const hash = bcrypt.hashSync(password, 10); 
     let user = new User({
       email: email,
       password: hash,
       name: name,
-      phone: phone || "", // Phone যুক্ত করা হলো
+      phone: phone || "",
+      role: role || "user" // 🎯 ফ্রন্টএন্ড থেকে "admin" বা "user" পাঠালে সেট হবে, না দিলে "user" হবে
     });
 
     await user.save();
 
     // ৫. টোকেন জেনারেট ও ইমেইল পাঠানো
     let token = tokenGenerator(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.ACCESS_TOKEN_SECRET,
       "1d"
     );
@@ -93,75 +94,47 @@ const registrationController = async (req, res) => {
 
 // loginController
 
-
-// let loginController = async (req, res) => {
-//     const { email, password } = req.body
-
-//     let users = await User.findOne({ email: email })
-//     if (!users) {
-//         return res.send({ message: "User not found" })
-//     }
-//     emptyFieldValidation(res, email, password)
-
-//     let pass = bcrypt.compareSync(password, users.password);
-
-//     if (!pass) {
-//         return res.send({ message: "Invalid Credential" })
-//     }
-
-
-      
-//     let token = tokenGenerator({
-//         id: users._id,
-//         email: users.email
-//     }, process.env.ACCESS_TOKEN_SECRET, "1d");
-
-//     res.send({
-//         message: "Login Successfull",
-//         token: token 
-        
-//     })
-
-// }
-
-
-
 let loginController = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  let users = await User.findOne({ email: email });
-  if (!users) {
-    return res.send({ success: false, message: "User not found" });
-  }
-  emptyFieldValidation(res, email, password);
-
-  let pass = bcrypt.compareSync(password, users.password);
-  if (!pass) {
-    return res.send({ success: false, message: "Invalid Credential" });
-  }
-
-  // ✅ token যোগ করা হলো
-  let token = tokenGenerator(
-    { id: users._id, email: users.email },
-    process.env.ACCESS_TOKEN_SECRET,
-    "1d"
-  );
-
-  res.send({
-    success: true,
-    message: "Login Successfull",
-    token: token, // ✅
-    data: {
-      _id: users._id,
-      name: users.name,
-      email: users.email,
-      isVerified: users.isVerified,
-      role: users.role,
-      isHold: users.isHold,
+    let users = await User.findOne({ email: email });
+    if (!users) {
+      return res.status(404).send({ success: false, message: "User not found" });
     }
-  });
-};
+    
+    emptyFieldValidation(res, email, password);
 
+    let pass = bcrypt.compareSync(password, users.password);
+    if (!pass) {
+      return res.status(400).send({ success: false, message: "Invalid Credential" });
+    }
+
+    // ✅ token-এ role যোগ করা হলো
+    let token = tokenGenerator(
+      { id: users._id, email: users.email, role: users.role },
+      process.env.ACCESS_TOKEN_SECRET,
+      "1d"
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Login Successfull",
+      token: token,
+      data: {
+        _id: users._id,
+        name: users.name,
+        email: users.email,
+        isVerified: users.isVerified,
+        role: users.role, // 🎯 রোল পাঠানো হচ্ছে
+        isHold: users.isHold,
+      }
+    });
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).send({ success: false, message: "Internal Server Error" });
+  }
+};
 //  Forgot Password Controller
 
 

@@ -5,7 +5,7 @@ let getAllUsersController = async (req, res) => {
      let userData = await User.find({})
      res.send({
           message: "All user Data",
-          userdata
+          userData
      })
 
 }
