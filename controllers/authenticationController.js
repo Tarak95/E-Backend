@@ -41,35 +41,39 @@ const jwt = require('jsonwebtoken');
 //     res.send({ message: "Registration Successful" });
 // };
 
-
-
 const registrationController = async (req, res) => {
   try {
-    const { email, password, confirmPassword, name } = req.body;
+    // phone যুক্ত করা হলো
+    const { email, password, confirmPassword, name, phone } = req.body;
 
+    // ১. অলরেডি ইউজার আছে কিনা চেক
     let users = await existingData(res, { email: email });
     if (users) {
       return res.status(400).json({ message: "User Already Exists" });
     }
 
+    // ২. রিকোয়ার্ড ফিল্ড ভ্যালিডেশন
     if (!email || !password || !confirmPassword || !name) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All required fields must be filled" });
     }
 
+    // ৩. পাসওয়ার্ড ম্যাচিং চেক
     if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Password not matched" });
+      return res.status(400).json({ message: "Passwords do not match" });
     }
 
-    const hash = bcrypt.hashSync(password, 10);
+    // ৪. পাসওয়ার্ড হ্যাশ করা ও ডাটাবেজে সেভ
+    const hash = bcrypt.hashSync(password, 10); 
     let user = new User({
       email: email,
       password: hash,
       name: name,
+      phone: phone || "", // Phone যুক্ত করা হলো
     });
 
     await user.save();
 
-   
+    // ৫. টোকেন জেনারেট ও ইমেইল পাঠানো
     let token = tokenGenerator(
       { id: user._id, email: user.email },
       process.env.ACCESS_TOKEN_SECRET,
@@ -78,8 +82,7 @@ const registrationController = async (req, res) => {
 
     await mailVerification(token, email);
 
-    
-    return res.status(200).json({ message: "Registration Successful" });
+    return res.status(200).json({ message: "Registration Successful. Please check your email." });
 
   } catch (error) {
     console.error("Registration Error:", error);
@@ -128,26 +131,26 @@ let loginController = async (req, res) => {
 
   let users = await User.findOne({ email: email });
   if (!users) {
-    return res.send({ 
-        success: false,
-        message: "User not found" 
-    });
+    return res.send({ success: false, message: "User not found" });
   }
   emptyFieldValidation(res, email, password);
 
   let pass = bcrypt.compareSync(password, users.password);
-
   if (!pass) {
-    return res.send({
-      success: false,
-      message: "Invalid Credential",
-    });
+    return res.send({ success: false, message: "Invalid Credential" });
   }
 
+  // ✅ token যোগ করা হলো
+  let token = tokenGenerator(
+    { id: users._id, email: users.email },
+    process.env.ACCESS_TOKEN_SECRET,
+    "1d"
+  );
 
   res.send({
     success: true,
     message: "Login Successfull",
+    token: token, // ✅
     data: {
       _id: users._id,
       name: users.name,

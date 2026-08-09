@@ -1,5 +1,69 @@
+// const mongoose = require("mongoose")
+// const { Schema } = mongoose
+
+// const useSchema = new Schema({
+//     name: {
+//         type: String,
+//     },
+//     email: {
+//         type: String,
+//     },
+//     password: {
+//         type: String,
+//     },
+//     phone: {
+//         type: String,
+//     },
+//     isVerified: {
+//         type: Boolean,
+//         default: false 
+//     },
+//     role: {
+//         type: String,
+//         enum: ['admin', 'user', 'editor', 'vendor'],
+//         default: 'user'
+//     },
+//     isHold: {
+//         type: Boolean,
+//         default: false
+//     },
+//     postalCode: {
+//         type: String,
+//     },
+//     address: {
+//         type: String,
+//     },
+//     city: {
+//         type: String,
+//     },
+//     billingAddress: {
+//         fullName: {
+//             type: String,
+//         },
+//         email: {
+//             type: String,
+//         },
+//         street: {
+//             type: String,
+//         },
+//         zipCode: {
+//             type: String,
+//         },
+//         phoneNumber: {
+//             type: String,
+//         },
+//     }
+// })
+
+// module.exports = mongoose.model('User', useSchema)
+
+
+
+
+
+
 const mongoose = require("mongoose")
-const { Schema } = mongoose
+const {Schema} = mongoose
 
 const useSchema = new Schema({
     name: {
@@ -14,45 +78,49 @@ const useSchema = new Schema({
     phone: {
         type: String,
     },
-    isVerified: {
+    isVerified:{
         type: Boolean,
-        default: false 
+        default: false
     },
-    role: {
+    role:{
         type: String,
-        enum: ['admin', 'user', 'editor', 'vendor'],
+        enum: ['admin','user','editor','vendor'],
         default: 'user'
     },
     isHold: {
         type: Boolean,
         default: false
     },
-    postalCode: {
+    postalCode:{
         type: String,
     },
-    address: {
+    address:{
         type: String,
     },
-    city: {
-        type: String,
+    city:{
+         type: String,
     },
-    billingAddress: {
+    isDelete:{
+        type: Boolean,
+        default: false,
+    },
+    billingAddress:{
         fullName: {
-            type: String,
+        type: String,
         },
         email: {
             type: String,
         },
-        street: {
+        street:{
             type: String,
         },
-        zipCode: {
+        zipCode:{
             type: String,
         },
         phoneNumber: {
             type: String,
         },
     }
-})
+}, {timestamps: true})
 
-module.exports = mongoose.model('User', useSchema)
+module.exports = mongoose.model('User',useSchema)
