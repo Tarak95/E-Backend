@@ -165,15 +165,38 @@ let loginController = async (req, res) => {
 //  Forgot Password Controller
 
 
-const forgotPasswordController = async (req, res) => {
+// const forgotPasswordController = async (req, res) => {
+//     let { email } = req.body;
+
+//     emptyFieldValidation(res, email)
+
+
+//     let users = await User.findOne({ email: email });
+//     if (!users) {
+//         return res.send({ message: "User not found" });
+//     }
+
+//     let token = tokenGenerator({
+//         id: users._id,
+//         email: users.email
+//     }, process.env.ACCESS_TOKEN_SECRET, "1d");
+
+//     resetPasswordMail(token, email);
+//     res.send({ message: "Please Check Your Email" });
+// };
+
+
+
+
+
+let forgotPasswordController = async (req, res) => {
     let { email } = req.body;
 
-    emptyFieldValidation(res, email)
-
+    emptyFieldValidation(res, email);
 
     let users = await User.findOne({ email: email });
     if (!users) {
-        return res.send({ message: "User not found" });
+        return res.status(404).send({ message: "User not found" });
     }
 
     let token = tokenGenerator({
@@ -182,7 +205,7 @@ const forgotPasswordController = async (req, res) => {
     }, process.env.ACCESS_TOKEN_SECRET, "1d");
 
     resetPasswordMail(token, email);
-    res.send({ message: "Please Check Your Email" });
+    res.status(200).send({ message: "Please Check Your Email" });
 };
 
 //  Reset Password Controller
