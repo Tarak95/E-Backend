@@ -8,73 +8,34 @@ const jwt = require('jsonwebtoken');
 
 //  Registration Controller
 
-
-// const registrationController = async (req, res) => {
-//     const { email, password, confirmPassword, name } = req.body;
-
-//     let users = await existingData(res, { email: email });
-//     if (users) {
-//         return res.send({ message: 'User Already Exists' });
-//     }
-
-//     emptyFieldValidation(res, email, password, confirmPassword);
-
-//     if (password !== confirmPassword) {
-//         return res.send({ message: "Password not matched" });
-//     }
-
-//     const hash = bcrypt.hashSync(password, 10);
-//     let user = new User({
-//         email: email,
-//         password: hash,
-//         name: name,
-//     });
-
-//     await user.save();
-
-//     let token = tokenGenerator({
-//         id: user._id,
-//         email: user.email
-//     }, process.env.ACCESS_TOKEN_SECRET, "1d");
-
-//     mailVerification(token, email);
-//     res.send({ message: "Registration Successful" });
-// };
-
 const registrationController = async (req, res) => {
   try {
-    // 🎯 role যুক্ত করা হলো
     const { email, password, confirmPassword, name, phone, role } = req.body;
 
-    // ১. অলরেডি ইউজার আছে কিনা চেক
     let users = await existingData(res, { email: email });
     if (users) {
       return res.status(400).json({ message: "User Already Exists" });
     }
 
-    // ২. রিকোয়ার্ড ফিল্ড ভ্যালিডেশন
     if (!email || !password || !confirmPassword || !name) {
       return res.status(400).json({ message: "All required fields must be filled" });
     }
 
-    // ৩. পাসওয়ার্ড ম্যাচিং চেক
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
 
-    // ৪. পাসওয়ার্ড হ্যাশ করা ও ডাটাবেজে সেভ (role সহ)
     const hash = bcrypt.hashSync(password, 10); 
     let user = new User({
       email: email,
       password: hash,
       name: name,
       phone: phone || "",
-      role: role || "user" // 🎯 ফ্রন্টএন্ড থেকে "admin" বা "user" পাঠালে সেট হবে, না দিলে "user" হবে
+      role: role || "user" 
     });
 
     await user.save();
 
-    // ৫. টোকেন জেনারেট ও ইমেইল পাঠানো
     let token = tokenGenerator(
       { id: user._id, email: user.email, role: user.role },
       process.env.ACCESS_TOKEN_SECRET,
@@ -110,7 +71,7 @@ let loginController = async (req, res) => {
       return res.status(400).send({ success: false, message: "Invalid Credential" });
     }
 
-    // ✅ token-এ role যোগ করা হলো
+   
     let token = tokenGenerator(
       { id: users._id, email: users.email, role: users.role },
       process.env.ACCESS_TOKEN_SECRET,
@@ -126,7 +87,7 @@ let loginController = async (req, res) => {
         name: users.name,
         email: users.email,
         isVerified: users.isVerified,
-        role: users.role, // 🎯 রোল পাঠানো হচ্ছে
+        role: users.role, 
         isHold: users.isHold,
       }
     });
