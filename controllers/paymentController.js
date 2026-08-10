@@ -1,18 +1,15 @@
-const axios = require('axios')
-const Cart = require('../models/cartModel')
-const Order = require('../models/orderModel')
+const axios = require('axios');
+const Cart = require('../models/cartModel');
+const Order = require('../models/orderModel');
 
 const paymentController = async (req, res) => {
-    const { userId, cus_name, cus_email, cus_add1, cus_add2, cus_city, cus_state, cus_postcode, cus_phone } = req.body
+    const { userId, cus_name, cus_email, cus_add1, cus_add2, cus_city, cus_state, cus_postcode, cus_phone } = req.body;
     
     try {
-        
-        //cart data miye asa and product populet kora
+        // cart data niye asa and product populate kora
+        const cart = await Cart.find({ user: userId }).populate('product');
 
-        const cart = await Cart.find({ user: userId }).populate('product')
-
-        //cart khali kita cak kora (khali thakle aikhanei atke debe )
-
+        // cart khali kina check kora
         if (!cart || cart.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -20,15 +17,12 @@ const paymentController = async (req, res) => {
             });
         }
 
-        let totalPrice = 0
-        let pro = []
+        let totalPrice = 0;
+        let pro = [];
 
-        
-        //Dynamically price hisab kora and product ary toiri
-
+        // Dynamically price hisab kora and product array toiri
         cart.forEach(item => {
             if (item.product) {
-                //product e offer price thakle seta nebe na thakle regular price nebe
                 const productPrice = item.product.discountPrice > 0 ? item.product.discountPrice : item.product.price;
                 const itemTotal = productPrice * item.quantity;
 
@@ -44,13 +38,12 @@ const paymentController = async (req, res) => {
                     images: item.product.images,
                     quantity: item.quantity,
                     totalPrice: itemTotal
-                })
+                });
 
                 totalPrice += itemTotal;
             }
         });
 
-        //says bar chake kora dam 0 ba tar kom kina
         if (totalPrice <= 0) {
             return res.status(400).json({
                 success: false,
@@ -58,7 +51,7 @@ const paymentController = async (req, res) => {
             });
         }
 
-        const tranId = "TXN-" + Date.now(); // Transaction id unike kora 
+        const tranId = "TXN-" + Date.now(); 
 
         const response = await axios.post(
             'https://sandbox.aamarpay.com/jsonpost.php',
@@ -90,17 +83,16 @@ const paymentController = async (req, res) => {
             }
         );
 
-        //  Database e order save kora
+        // Database e order save kora
         const order = new Order({
             user: userId,
             products: pro,
             totalPrice: totalPrice,
             tranid: tranId
-        })
+        });
 
-        await order.save()
+        await order.save();
 
-        // AamarPay theke paoua pyment url respons pathano 
         res.json(response.data);
 
     } catch (error) {
@@ -113,24 +105,24 @@ const paymentController = async (req, res) => {
 };
 
 const getAllOrdersController = async (req, res) => {
-    const { userid } = req.params
+    const { userid } = req.params;
     try {
-        let data = await Order.find({ user: userid })
-
-        if (!data.length) {
-            return res.status(404).json({
-                success: false,
-                message: 'Order Not Found'
-            })
+        // 🎯 ১. userid 'all' অথবা undefined হলে সব অর্ডার ফিল্টার ছাড়া আনবে
+        let query = {};
+        if (userid && userid !== 'all') {
+            query = { user: userid };
         }
 
+        let orders = await Order.find(query).populate('user');
+
+        // 🎯 ২. ডাটা না থাকলেও 404 না দিয়ে খালি অ্যারে রেসপন্স দেওয়া ভালো
         res.status(200).json({
             success: true,
-            data
-        })
+            data: orders || []
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 
-module.exports = { paymentController, getAllOrdersController }
+module.exports = { paymentController, getAllOrdersController };
