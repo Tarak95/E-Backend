@@ -12,6 +12,18 @@ let getAllUsersController = async (req, res) => {
     }
 }
 
+let getDeletedUsersController = async (req, res) => {
+    try {
+        let userData = await User.find({ isDelete: true })
+        res.status(200).send({
+            message: "All deleted user Data",
+            userData
+        })
+    } catch (error) {
+        res.status(500).send({ message: "Server Error", error: error.message })
+    }
+}
+
 let singleUserDataController = async (req, res) => {
     try {
         let { id } = req.params
@@ -43,6 +55,24 @@ let deleteUserController = async (req, res) => {
     }
 }
 
+let restoreUserController = async (req, res) => {
+    try {
+        let { id } = req.params
+        let userData = await User.findByIdAndUpdate(
+            id,
+            { isDelete: false },
+            { new: true }
+        )
+
+        res.status(200).send({
+            message: `User activated successfully`,
+            userData
+        })
+    } catch (error) {
+        res.status(500).send({ message: "Server Error", error: error.message })
+    }
+}
+
 let updateUserController = async (req, res) => {
     try {
         const { id } = req.params
@@ -57,4 +87,11 @@ let updateUserController = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, singleUserDataController, deleteUserController, updateUserController }
+module.exports = { 
+    getAllUsersController, 
+    getDeletedUsersController, 
+    singleUserDataController, 
+    deleteUserController, 
+    restoreUserController, 
+    updateUserController 
+}
