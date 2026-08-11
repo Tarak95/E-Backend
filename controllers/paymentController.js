@@ -107,7 +107,6 @@ const paymentController = async (req, res) => {
 const getAllOrdersController = async (req, res) => {
     const { userid } = req.params;
     try {
-        // 🎯 ১. userid 'all' অথবা undefined হলে সব অর্ডার ফিল্টার ছাড়া আনবে
         let query = {};
         if (userid && userid !== 'all') {
             query = { user: userid };
@@ -115,7 +114,6 @@ const getAllOrdersController = async (req, res) => {
 
         let orders = await Order.find(query).populate('user');
 
-        // 🎯 ২. ডাটা না থাকলেও 404 না দিয়ে খালি অ্যারে রেসপন্স দেওয়া ভালো
         res.status(200).json({
             success: true,
             data: orders || []
