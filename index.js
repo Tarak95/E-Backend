@@ -6,7 +6,7 @@ const app = express()
 const cors = require('cors')
 const dbConfig = require("./config/dbConfig")
 const { registrationController, loginController, forgotPasswordController, resetPasswordController, resendVerificationEmailController, verifyEmailController } = require('./controllers/authenticationController')
-const { getAllUsersController,getDeletedUsersController, singleUserDataController, deleteUserController,restoreUserController, updateUserController } = require('./controllers/userController');
+const { getAllUsersController,getDeletedUsersController, singleUserDataController, deleteUserController,restoreUserController, updateUserController,getSearchData } = require('./controllers/userController');
 const { createProductController, allProductController, singleProductController, deleteProductController, updateProductController } = require('./controllers/productController')
 const axios = require('axios')
 const { createCart, increDecre, getCart, proDelete } = require('./controllers/cartController')
@@ -96,6 +96,7 @@ app.get('/getorders/:userid', getAllOrdersController)
 
 app.get('/allusers', getAllUsersController)
 app.get('/deletedusers', getDeletedUsersController);
+app.post('/search', getSearchData)
 app.get('/singleuser/:id', singleUserDataController)
 app.delete('/deleteuser/:id', deleteUserController)
 app.put('/restoreuser/:id', restoreUserController);

@@ -24,6 +24,30 @@ let getDeletedUsersController = async (req, res) => {
     }
 }
 
+
+let getSearchData = async (req, res) => {
+    try {
+        const { name, isDelete } = req.body;
+        const deleteStatus = isDelete ? true : { $ne: true };
+
+        let userData = await User.find({
+            isDelete: deleteStatus,
+            $or: [
+                { name: { $regex: name || '', $options: 'i' } },
+                { username: { $regex: name || '', $options: 'i' } },
+                { email: { $regex: name || '', $options: 'i' } }
+            ]
+        });
+
+        res.status(200).send({
+            message: "Search results",
+            userData
+        });
+    } catch (error) {
+        res.status(500).send({ message: "Server Error", error: error.message });
+    }
+}; 
+
 let singleUserDataController = async (req, res) => {
     try {
         let { id } = req.params
@@ -90,6 +114,7 @@ let updateUserController = async (req, res) => {
 module.exports = { 
     getAllUsersController, 
     getDeletedUsersController, 
+    getSearchData,
     singleUserDataController, 
     deleteUserController, 
     restoreUserController, 
